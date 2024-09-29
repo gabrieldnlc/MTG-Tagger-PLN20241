@@ -10,6 +10,8 @@ pip install -r requirements.txt
 ```
 
 Após isso, para testar o modelo pré-treinado disponível:
+Primeiro, baixe-o em https://drive.google.com/file/d/1FErW9JjVyxwqoc6OiqzUOJ2kQbkXdx0n (arquivo muito grande para o Git -- 250 MB)
+Extraia-o na pasta raíz do projeto. Então:
 ```bash
 python modelo_pretreinado.py pretreinado
 ```
