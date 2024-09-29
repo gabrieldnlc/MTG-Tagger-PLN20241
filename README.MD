@@ -1,7 +1,7 @@
 Projeto referente à disciplina de Processamento de Linguagem Natural, UFCG 2024.1
 
-Gabriel Dantas Lima Costa 122210429
-Paulo Ricardo Oliveira de Macêdo 121110379
+- Gabriel Dantas Lima Costa 122210429
+- Paulo Ricardo Oliveira de Macêdo 121110379
 
 INSTALAÇÃO:
 ```bash
