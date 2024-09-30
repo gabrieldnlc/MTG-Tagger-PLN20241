@@ -52,6 +52,8 @@ def main():
     model = DistilBertForSequenceClassification.from_pretrained(checkpoint, num_labels=num_labels,
                                                                 problem_type="multi_label_classification")
     
+    # A classe distilbertDataset é uma subclasse de torch.utils.data.Dataset
+    # Dentre outras coisas, ela trunca o texto para garantir que todos eles tenham dimensões fixas
     dataset_treino = distilbertDataset(texto_treino, tags_treino, tokenizer)
     dataset_validacao = distilbertDataset(texto_validacao, tags_validacao, tokenizer)
 
@@ -84,17 +86,21 @@ def main():
 
     carta_teste = r'Draw three cards.'
 
-    encoding = tokenizer(carta_teste, return_tensors='pt')
+    encoding = tokenizer(carta_teste, return_tensors='pt') # pt = PyTorch
     encoding.to(trainer.model.device)
 
-    outputs = trainer.model(**encoding)
+    outputs = trainer.model(**encoding) # Outputs, nesse momento, contem os valores brutos de saída da rede neural (logits)
 
+    # Para converter os logits para dados que fazem sentido para nós, usamos a sigmóide, usando a implementação do PyTorch
     sigmoid = torch.nn.Sigmoid()
     probs = sigmoid(outputs.logits[0].cpu())
     preds = np.zeros(probs.shape)
-    preds[np.where(probs>=0.3)] = 1
 
-    multilabel.classes_
+    corte = 30 # A taxa (em %) que consideramos como corte para a presença de uma tag
+    corte_porcento = corte/100
+    # Se a probabilidade for maior que o corte, consideramos que a tag está presente
+    preds[np.where(probs>=corte_porcento)] = 1
+
     print("Carta teste: ", carta_teste)
     print(multilabel.inverse_transform(preds.reshape(1,-1)))
 

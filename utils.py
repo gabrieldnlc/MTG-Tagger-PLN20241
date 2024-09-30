@@ -62,18 +62,22 @@ def loop_modelo(modelo, tokenizer, multilabel):
 # Funções adaptadas de: https://github.com/laxmimerit/NLP-Tutorials-with-HuggingFace/
 def analisa_prompt(modelo, tokenizer, multilabel, texto):
 
-    encoding = tokenizer(texto, return_tensors='pt')
-    encoding.to(modelo.device)
+    encoding = tokenizer(texto, return_tensors='pt') # pt = PyTorch
+    encoding.to(modelo.device) 
 
-    outputs = modelo(**encoding)
+    outputs = modelo(**encoding) # Outputs, nesse momento, contem os logits
 
+    # Para converter os logits para dados que fazem sentido para nós, usamos a sigmóide
     sigmoid = torch.nn.Sigmoid()
     probs = sigmoid(outputs.logits[0].cpu())
     preds = np.zeros(probs.shape)
-    preds[np.where(probs>=0.3)] = 1
 
-    multilabel.classes_
+    corte = 30 # A taxa, em porcentagem, que consideramos como corte para a presença de uma tag
+    corte_porcento = corte/100
+    # Se a probabilidade for maior que o corte, consideramos que a tag está presente
+    preds[np.where(probs>=corte_porcento)] = 1
 
+    # Convertendo as previsões (binárias) para os rótulos das tags
     return multilabel.inverse_transform(preds.reshape(1,-1))
 
 class distilbertDataset(Dataset):
@@ -106,7 +110,7 @@ def multi_labels_metrics(predictions, labels, threshold=0.3):
     y_pred[np.where(probs >= threshold)] = 1
     y_true = labels
 
-    f1 = f1_score(y_true, y_pred, average='macro', zero_division=1)
+    f1 = f1_score(y_true, y_pred, average='macro', zero_division=1) # Zero division é para evitar erros quando não há previsões para uma classe específica.
     hamming = hamming_loss(y_true, y_pred)
 
     metrics = {
